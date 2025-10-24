@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Croissants da Escola — Pedido Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7eb;--accent:#f59e0b;--card:#ffffff;--muted:#6b7280;--success:#10b981;--max-width:980px;}
+*{box-sizing:border-box}
+body{font-family:Inter,system-ui,Arial;color:#111;margin:0;background:linear-gradient(180deg,var(--bg),#fff);display:flex;justify-content:center;padding:24px;}
+.wrap{width:100%;max-width:var(--max-width);box-shadow:0 10px 30px rgba(2,6,23,0.08);border-radius:16px;overflow:hidden;background:var(--card)}
+header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(90deg,#fffaf0,#fff7eb);border-bottom:1px solid rgba(0,0,0,0.04)}
+.logo{font-size:32px}
+h1{margin:0;font-size:22px}
+.main{display:grid;grid-template-columns:1fr 360px;gap:18px;padding:20px}
+@media(max-width:880px){.main{grid-template-columns:1fr;}.sidebar{order:2}}
+.card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+.products{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:720px){.products{grid-template-columns:repeat(2,1fr)}}
+.prod{display:flex;align-items:center;gap:12px;border-radius:10px;padding:12px;border:1px solid rgba(0,0,0,0.03);background:linear-gradient(90deg,#fff1e5,#fff7eb)}
+.prod .emoji{font-size:36px}
+.prod h3{margin:0;font-size:16px;font-weight:600}
+.prod p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.controls{margin-left:auto;display:flex;align-items:center;gap:8px}
+.btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
+.btn.secondary{background:transparent;color:#111;border:1px solid rgba(0,0,0,0.06)}
+.qtyBtn{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);background:#fff;cursor:pointer}
+.sidebar{display:flex;flex-direction:column;gap:12px}
+.profileRow{display:flex;gap:12px;align-items:center}
+.avatar{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fde68a,#f97316);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+input[type=text], input[type=tel], select, textarea{width:100%;padding:8px;margin-top:4px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px}
+.title{font-weight:600;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<div class="logo">🥐</div>
+<div>
+<h1>Croissants da Escola</h1>
+<p style="font-size:13px;color:#6b7280;">R$10 cada — fresquinho e delicioso!</p>
+</div>
+</header>
+<div class="main">
+<div>
+<div class="card">
+<h2>Login / Cadastro</h2>
+<div class="title">Nome</div>
+<input type="text" id="nome" placeholder="Seu nome completo">
+<div class="title">Número de Celular</div>
+<input type="tel" id="celular" placeholder="(99) 99999-9999">
+<div class="title">Turma</div>
+<input type="text" id="turma" placeholder="Ex: 5ºB">
+<div class="title">Foto (opcional)</div>
+<input type="file" id="foto" accept="image/*">
+<button class="btn" onclick="login()">Entrar</button>
+</div>
+<div class="card products" id="produtos" style="margin-top:18px;display:none">
+<h2>Escolha seus Croissants</h2>
+</div>
+</div>
+<div class="sidebar card" id="pedido" style="display:none">
+<h2>Seu Pedido</h2>
+<div id="resumoPedido">Nenhum croissant adicionado.</div>
+<div class="title">Observações</div>
+<textarea id="obs" placeholder="Alguma observação?"></textarea>
+<button class="btn" onclick="enviarPedido()">Enviar Pedido</button>
+</div>
+</div>
+</div>
+<script>
+const WHATSAPP_NUMBER = '5544998230287';
+let user = {};
+const produtosList = [
+{id:'pizza',nome:'Croissant de Pizza',emoji:'🍕'},
+{id:'chocolate',nome:'Croissant de Chocolate',emoji:'🍫'},
+{id:'frango',nome:'Croissant de Frango',emoji:'🍗'}
+];
+let carrinho = {};
+function login(){
+const nome=document.getElementById('nome').value;
+const celular=document.getElementById('celular').value;
+const turma=document.getElementById('turma').value;
+if(!nome||!celular||!turma){alert('Preencha todos os campos obrigatórios');return;}
+user={nome,celular,turma};
+document.getElementById('produtos').style.display='grid';
+document.getElementById('pedido').style.display='flex';
+renderProdutos();
+}
+function renderProdutos(){
+const container=document.getElementById('produtos');
+container.innerHTML='';
+produtosList.forEach(p=>{
+const div=document.createElement('div');
+div.className='prod';
+div.innerHTML=`<div class='emoji'>${p.emoji}</div><div><h3>${p.nome}</h3></div><div class='controls'><button class='qtyBtn' onclick="addProduto('${p.id}')">+</button><span id='qtd-${p.id}' style='margin:0 8px'>0</span><button class='qtyBtn' onclick="remProduto('${p.id}')">-</button></div>`;
+container.appendChild(div);
+});
+}
+function addProduto(id){
+carrinho[id]=(carrinho[id]||0)+1;
+document.getElementById('qtd-'+id).innerText=carrinho[id];
+atualizarResumo();
+}
+function remProduto(id){
+if(!carrinho[id])return;
+carrinho[id]-=1;
+if(carrinho[id]<=0)delete carrinho[id];
+document.getElementById('qtd-'+id).innerText=carrinho[id]||0;
+atualizarResumo();
+}
+function atualizarResumo(){
+const container=document.getElementById('resumoPedido');
+if(Object.keys(carrinho).length===0){container.innerText='Nenhum croissant adicionado.';return;}
+let html='';
+let total=0;
+Object.entries(carrinho).forEach(([id,qtd])=>{
+const p=produtosList.find(x=>x.id===id);
+html+=`<div>${p.nome} x${qtd} = R$${(qtd*10).toFixed(2)}</div>`;
+total+=qtd*10;
+});
+html+=`<div style='margin-top:8px;font-weight:600'>Total: R$${total.toFixed(2)}</div>`;
+container.innerHTML=html;
+}
+function enviarPedido(){
+if(Object.keys(carrinho).length===0){alert('Adicione pelo menos 1 croissant');return;}
+const obs=document.getElementById('obs').value;
+let msg=`Pedido de Croissants:%0ANome: ${user.nome}%0ATurma: ${user.turma}%0ACelular: ${user.celular}%0A`;
+msg+='Itens:%0A';
+Object.entries(carrinho).forEach(([id,qtd])=>{
+const p=produtosList.find(x=>x.id===id);
+msg+=`- ${p.nome} x${qtd}%0A`;
+});
+msg+=`Observações: ${obs||'Nenhuma'}%0A`;
+window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,'_blank');
+}
+</script>
+</body>
+</html>
