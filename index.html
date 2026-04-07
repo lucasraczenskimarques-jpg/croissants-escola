@@ -10,6 +10,9 @@
 *{box-sizing:border-box}
 body{font-family:Inter,system-ui,Arial;color:#111;margin:0;background:linear-gradient(180deg,var(--bg),#fff);display:flex;justify-content:center;padding:24px;}
 .wrap{width:100%;max-width:var(--max-width);box-shadow:0 10px 30px rgba(2,6,23,0.08);border-radius:16px;overflow:hidden;background:var(--card)}
+nav{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:linear-gradient(90deg,#fffaf0,#fff7eb);border-bottom:1px solid rgba(0,0,0,0.1)}
+nav a{text-decoration:none;color:#111;font-weight:600}
+nav a:hover{text-decoration:underline}
 header{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(90deg,#fffaf0,#fff7eb);border-bottom:1px solid rgba(0,0,0,0.04)}
 .logo{font-size:32px}
 h1{margin:0;font-size:22px}
@@ -31,17 +34,29 @@ h1{margin:0;font-size:22px}
 .avatar{width:64px;height:64px;border-radius:12px;background:linear-gradient(180deg,#fde68a,#f97316);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
 input[type=text], input[type=tel], select, textarea{width:100%;padding:8px;margin-top:4px;margin-bottom:8px;border:1px solid #ddd;border-radius:8px}
 .title{font-weight:600;margin-bottom:6px}
+#sobre{margin-top:24px;padding:16px;text-align:center}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+<!-- Menu -->
+<nav>
+  <div class="logo">🥐</div>
+  <div style="display:flex;gap:16px;">
+    <a href="#produtos">Produtos</a>
+    <a href="#pedido">Pedido</a>
+    <a href="#sobre">Sobre</a>
+  </div>
+</nav>
+
 <header>
-<div class="logo">🥐</div>
 <div>
 <h1>Croissants da Escola</h1>
 <p style="font-size:13px;color:#6b7280;">R$10 cada — fresquinho e delicioso!</p>
 </div>
 </header>
+
 <div class="main">
 <div>
 <div class="card">
@@ -56,10 +71,12 @@ input[type=text], input[type=tel], select, textarea{width:100%;padding:8px;margi
 <input type="file" id="foto" accept="image/*">
 <button class="btn" onclick="login()">Entrar</button>
 </div>
+
 <div class="card products" id="produtos" style="margin-top:18px;display:none">
 <h2>Escolha seus Croissants</h2>
 </div>
 </div>
+
 <div class="sidebar card" id="pedido" style="display:none">
 <h2>Seu Pedido</h2>
 <div id="resumoPedido">Nenhum croissant adicionado.</div>
@@ -68,7 +85,17 @@ input[type=text], input[type=tel], select, textarea{width:100%;padding:8px;margi
 <button class="btn" onclick="enviarPedido()">Enviar Pedido</button>
 </div>
 </div>
+
+<!-- Seção Sobre -->
+<div id="sobre" class="card">
+  <h2>Sobre</h2>
+  <p>
+    Bem-vindo ao Croissants da Escola! Aqui você pode fazer seu pedido de croissants fresquinhos
+    e deliciosos, direto da escola para você. Todos os croissants são feitos com muito carinho
+    e ingredientes de qualidade.
+  </p>
 </div>
+
 <script>
 const WHATSAPP_NUMBER = '5544998230287';
 let user = {};
@@ -126,15 +153,4 @@ container.innerHTML=html;
 function enviarPedido(){
 if(Object.keys(carrinho).length===0){alert('Adicione pelo menos 1 croissant');return;}
 const obs=document.getElementById('obs').value;
-let msg=`Pedido de Croissants:%0ANome: ${user.nome}%0ATurma: ${user.turma}%0ACelular: ${user.celular}%0A`;
-msg+='Itens:%0A';
-Object.entries(carrinho).forEach(([id,qtd])=>{
-const p=produtosList.find(x=>x.id===id);
-msg+=`- ${p.nome} x${qtd}%0A`;
-});
-msg+=`Observações: ${obs||'Nenhuma'}%0A`;
-window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`,'_blank');
-}
-</script>
-</body>
-</html>
+let msg
